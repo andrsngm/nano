@@ -14,7 +14,7 @@ greenlet==3.3.2
 # 3. Seguridad y Usuarios
 Flask-Login==0.6.3
 
-# 4. Procesamiento de Datos de Venezuela
+# 4. Procesamiento de Datos
 pandas==2.3.3
 openpyxl==3.1.5
 numpy==2.2.6
