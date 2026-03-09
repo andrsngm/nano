@@ -1,0 +1,251 @@
+﻿{% extends "admin/base_admin.html" %}
+{% block content %}
+
+    <style>
+
+    body {
+        background-color: #f8f9fa; /* Un gris muy claro */
+        margin: 0;
+        padding: 0;
+        width: 82%;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2><i class="bi bi-database-fill"></i> Base de Datos Maestra</h2>
+        <span class="badge bg-dark">Total Registros: {{ jovenes|length }}</span>
+    </div>
+    <hr>
+
+
+
+    <div class="table-responsive" style="max-height: 75vh; overflow-y: auto;">
+        <table class="table table-sm table-striped table-hover table-bordered align-middle" style="font-size: 0.85rem;">
+            <thead class="table-dark text-center" style="position: sticky; top: 0; z-index: 10;">
+                <tr>
+                    <th colspan="6" class="bg-primary">Información del Participante</th>
+                    <th colspan="3" class="bg-success">Ubicación y Categoría</th>
+                    <th colspan="3" class="bg-warning text-dark">Representante</th>
+                    <th colspan="5" class="bg-info text-dark">Seguimiento y Calificaciones</th>
+                </tr>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombres</th>
+                    <th>Apellidos</th>
+                    <th>Cédula</th>
+                    <th>Edad</th>
+                    <th>Sexo</th>
+                    <th>Estado</th>
+                    <th>Cat.</th>
+                    <th>Fase Act.</th>
+                    <th>Representante</th>
+                    <th>Parentesco</th>
+                    <th>Teléfono Rep.</th>
+                    <th>Tutor Asignado</th>
+                    <th>Nota Est.</th>
+                    <th>Nota Reg.</th>
+                    <th>Nota Nac.</th>
+                    <th class="table-primary">Final</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for j in jovenes %}
+                <tr>
+                    <td class="text-center fw-bold">{{ j.id }}</td>
+                    <td>{{ j.nombres }} {{ j.segundo_nombre or '' }}</td>
+                    <td>{{ j.apellidos }} {{ j.segundo_apellido or '' }}</td>
+                    <td>{{ j.cedula }}</td>
+                    <td class="text-center">{{ j.edad }}</td>
+                    <td class="text-center">{{ j.sexo }}</td>
+                    <td>{{ j.estado }}</td>
+                    <td class="text-center"><span class="badge bg-secondary">{{ j.categoria }}</span></td>
+                    <td>{{ j.fase }}</td>
+                    
+                    <td>{{ j.rep_nombre1 or 'N/A' }} {{ j.rep_apellido1 or '' }}</td>
+                    <td>{{ j.rep_parentesco or '-' }}</td>
+                    <td>{{ j.rep_telefono or '-' }}</td>
+                    
+                    <td class="text-nowrap italic">
+                        <i class="bi bi-person-badge"></i> {{ j.tutor.nombre }} {{ j.tutor.apellido }}
+                    </td>
+
+                    <td class="text-end">{{ "{:,.2f}".format(j.nota_estadal).replace(',', 'X').replace('.', ',').replace('X', '.') }}</td>
+                    <td class="text-end">{{ "{:,.2f}".format(j.nota_regional).replace(',', 'X').replace('.', ',').replace('X', '.') }}</td>
+                    <td class="text-end">{{ "{:,.2f}".format(j.nota_nacional).replace(',', 'X').replace('.', ',').replace('X', '.') }}</td>
+                    <td class="text-end fw-bold table-primary">
+                        {{ "{:,.2f}".format(j.nota_final).replace(',', 'X').replace('.', ',').replace('X', '.') }}
+                    </td>
+
+                    <td class="text-center">
+    <button type="button" class="btn btn-sm btn-warning" 
+            data-bs-toggle="modal" 
+            data-bs-target="#editModal{{ j.id }}" title="Editar Registro">
+        <i class="bi bi-pencil-square"></i>
+    </button>
+</td>
+                </tr>
+
+
+
+
+                <div class="modal fade" id="editModal{{ j.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl"> <form action="{{ url_for('editar_joven_admin', joven_id=j.id) }}" method="POST">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title"><i class="bi bi-pencil-fill"></i> Editando Registro: {{ j.nombres }} {{ j.apellidos }} (ID: {{ j.id }})</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body bg-light">
+                    <div class="container-fluid">
+                        <div class="row g-2 mb-4 p-3 bg-white border rounded">
+                            <h6 class="text-primary border-bottom pb-2"><i class="bi bi-person-circle"></i> Datos Personales del Joven</h6>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Primer Nombre</label>
+                                <input type="text" name="nombres" class="form-control form-control-sm" value="{{ j.nombres }}" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Segundo Nombre</label>
+                                <input type="text" name="segundo_nombre" class="form-control form-control-sm" value="{{ j.segundo_nombre or '' }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Primer Apellido</label>
+                                <input type="text" name="apellidos" class="form-control form-control-sm" value="{{ j.apellidos }}" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Segundo Apellido</label>
+                                <input type="text" name="segundo_apellido" class="form-control form-control-sm" value="{{ j.segundo_apellido or '' }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold">Cédula</label>
+                                <input type="text" name="cedula" class="form-control form-control-sm" value="{{ j.cedula }}" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold">Edad</label>
+                                <input type="number" name="edad" class="form-control form-control-sm" value="{{ j.edad }}" required>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold">Sexo</label>
+                                <select name="sexo" class="form-select form-select-sm">
+                                    <option value="M" {% if j.sexo == 'M' %}selected{% endif %}>Masculino</option>
+                                    <option value="F" {% if j.sexo == 'F' %}selected{% endif %}>Femenino</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Teléfono</label>
+                                <input type="text" name="telefono" class="form-control form-control-sm" value="{{ j.telefono or '' }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Email</label>
+                                <input type="email" name="email" class="form-control form-control-sm" value="{{ j.email or '' }}">
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-4 p-3 bg-white border rounded">
+                            <h6 class="text-success border-bottom pb-2"><i class="bi bi-geo-alt-fill"></i> Ubicación y Académico</h6>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Escuela / Universidad</label>
+                                <input type="text" name="escuela" class="form-control form-control-sm" value="{{ j.escuela or '' }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold">Grado / Año</label>
+                                <input type="text" name="grado" class="form-control form-control-sm" value="{{ j.grado or '' }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold">Estado</label>
+                                <input type="text" name="estado" class="form-control form-control-sm" value="{{ j.estado or '' }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold">Municipio</label>
+                                <input type="text" name="municipio" class="form-control form-control-sm" value="{{ j.municipio or '' }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold">Parroquia</label>
+                                <input type="text" name="parroquia" class="form-control form-control-sm" value="{{ j.parroquia or '' }}">
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-4 p-3 bg-white border rounded">
+    <h6 class="text-warning border-bottom pb-2"><i class="bi bi-shield-lock-fill"></i> Datos del Representante</h6>
+    <div class="col-md-3">
+        <label class="form-label small fw-bold">Primer Nombre</label>
+        <input type="text" name="rep_nombre1" class="form-control form-control-sm" value="{{ j.rep_nombre1 or '' }}">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label small fw-bold">Segundo Nombre</label>
+        <input type="text" name="rep_nombre2" class="form-control form-control-sm" value="{{ j.rep_nombre2 or '' }}">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label small fw-bold">Primer Apellido</label>
+        <input type="text" name="rep_apellido1" class="form-control form-control-sm" value="{{ j.rep_apellido1 or '' }}">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label small fw-bold">Segundo Apellido</label>
+        <input type="text" name="rep_apellido2" class="form-control form-control-sm" value="{{ j.rep_apellido2 or '' }}">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label small fw-bold">Cédula</label>
+        <input type="text" name="rep_cedula" class="form-control form-control-sm" value="{{ j.rep_cedula or '' }}">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label small fw-bold">Parentesco</label>
+        <input type="text" name="rep_parentesco" class="form-control form-control-sm" value="{{ j.rep_parentesco or '' }}">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label small fw-bold">Profesión</label>
+        <input type="text" name="rep_profesion" class="form-control form-control-sm" value="{{ j.rep_profesion or '' }}">
+    </div>
+    <div class="col-md-3">
+        <label class="form-label small fw-bold">Teléfono</label>
+        <input type="text" name="rep_telefono" class="form-control form-control-sm" value="{{ j.rep_telefono or '' }}">
+    </div>
+</div>
+
+                        <div class="row g-2 p-3 bg-white border rounded">
+                            <h6 class="text-danger border-bottom pb-2"><i class="bi bi-trophy-fill"></i> Seguimiento y Calificaciones</h6>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Fase Actual</label>
+                                <select name="fase" class="form-select form-select-sm">
+                                    <option value="Estadal" {% if j.fase == 'Estadal' %}selected{% endif %}>Estadal</option>
+                                    <option value="Regional" {% if j.fase == 'Regional' %}selected{% endif %}>Regional</option>
+                                    <option value="Nacional" {% if j.fase == 'Nacional' %}selected{% endif %}>Nacional</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold">Nota Estadal</label>
+                                <input type="text" name="nota_estadal" class="form-control form-control-sm" value="{{ j.nota_estadal }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold">Nota Regional</label>
+                                <input type="text" name="nota_regional" class="form-control form-control-sm" value="{{ j.nota_regional }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label small fw-bold">Nota Nacional</label>
+                                <input type="text" name="nota_nacional" class="form-control form-control-sm" value="{{ j.nota_nacional }}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Categoría (Manual)</label>
+                                <select name="categoria" class="form-select form-select-sm">
+                                    <option value="A" {% if j.categoria == 'A' %}selected{% endif %}>Categoría A (15-17)</option>
+                                    <option value="B" {% if j.categoria == 'B' %}selected{% endif %}>Categoría B (18-22)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar sin guardar</button>
+                    <button type="submit" class="btn btn-primary px-4"><i class="bi bi-save"></i> Guardar Todos los Cambios</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

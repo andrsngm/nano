@@ -1,0 +1,129 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Admin - Semillero</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .navbar { background-color: #002b5c !format; border-bottom: 4px solid #0056b3; }
+        .sidebar-title { color: #002b5c; font-weight: bold; border-left: 5px solid #0056b3; padding-left: 10px; }
+        .status-badge { border-radius: 20px; padding: 5px 15px; }
+
+        :root {
+    --nbas-blue-dark: #002855;
+    --nbas-blue-vibrant: #0056b3;
+    --nbas-silver: #f4f7fa;
+    --nbas-accent: #00a8e8;
+}
+
+body {
+    background-color: var(--nbas-silver);
+    color: #333;
+}
+
+/* Encabezado con el degradado del manual */
+.navbar {
+    background: linear-gradient(90deg, var(--nbas-blue-dark) 0%, var(--nbas-blue-vibrant) 100%);
+    border-bottom: 3px solid var(--nbas-accent);
+}
+
+/* Tarjetas con estilo "Tech" */
+.section-card {
+    background: #ffffff;
+    border-top: 5px solid var(--nbas-blue-vibrant);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 40, 85, 0.1);
+}
+
+.header-line {
+    color: var(--nbas-blue-dark);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 800;
+    border-bottom: 2px solid var(--nbas-silver);
+    padding-bottom: 10px;
+}
+
+/* Botones con el estilo de las Olimpiadas */
+.btn-primary {
+    background-color: var(--nbas-blue-dark);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--nbas-blue-vibrant);
+    transform: translateY(-2px);
+}
+
+    </style>
+</head>
+<body class="bg-light">
+
+    <nav class="navbar navbar-dark p-3">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">ADMINISTRACIÓN | SEMILLERO</span>
+            <a href="/logout" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="sidebar-title mb-4">CREAR ACCESO TUTOR</h5>
+                        <form action="/admin/crear_tutor" method="POST">
+                            <input type="text" name="user" class="form-control mb-2" placeholder="Usuario" required>
+                            <input type="password" name="pass" class="form-control mb-3" placeholder="Contraseña" required>
+                            <button class="btn btn-primary w-100">Registrar Nuevo Tutor</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h5 class="sidebar-title mb-3">SISTEMA DE NOTAS</h5>
+                        <p>Estado actual: 
+                            <span class="badge {% if config.notas_habilitadas %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ "HABILITADO" if config.notas_habilitadas else "CERRADO" }}
+                            </span>
+                        </p>
+                        <form action="/admin/toggle_notas" method="POST">
+                            <button class="btn btn-dark btn-sm w-100">Alternar Estado</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="sidebar-title mb-4">TUTORES REGISTRADOS</h5>
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Usuario</th>
+                                    <th>Rol</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for t in tutores %}
+                                <tr>
+                                    <td>{{ t.id }}</td>
+                                    <td>{{ t.username }}</td>
+                                    <td><span class="badge bg-info text-dark">{{ t.rol }}</span></td>
+                                    <td><button class="btn btn-sm btn-outline-secondary">Editar</button></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,196 @@
+﻿{% extends "admin/base_admin.html" %}
+
+{% block title %}Dashboard Administrativo{% endblock %}
+
+{% block content %}
+
+<style>
+
+    body {
+        background-color: #f8f9fa; /* Un gris muy claro */
+        margin: 0;
+        padding: 0;
+        width: 82%;
+    }
+    </style >
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom" >
+    <h1 class="h2 text-success fw-bold" > Resumen General 2026</h1 >
+    <button class="btn btn-warning fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#modalPromocion" >
+    🚀 Promocionar Fase
+    </button >
+    </div >
+
+    <div class="row" >
+    <div class="col-md-4" >
+    <div class="card card-stats bg-white shadow-sm p-3 mb-4 border-0 rounded-4" >
+    <div class="d-flex align-items-center" >
+    <div class="flex-shrink-0 bg-success p-3 rounded-circle text-white" >
+    <i class="bi bi-person-badge fs-3" > </i >
+    </div >
+    <div class="flex-grow-1 ms-3" >
+    <h6 class="text-muted mb-0" > Total Tutores</h6 >
+    <h3 class="fw-bold mb-0" > {{ "{:,.0f}".format(total_tutores).replace(',', '.') }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card card-stats bg-white shadow-sm p-3 mb-4 border-0 rounded-4">
+            <div class="d-flex align-items-center">
+                <div class="flex-shrink-0 bg-primary p-3 rounded-circle text-white">
+                    <i class="bi bi-mortarboard fs-3"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <h6 class="text-muted mb-0">Jóvenes Registrados</h6>
+                    <h3 class="fw-bold mb-0">{{ "{:,.0f}".format(total_jovenes).replace(',', '.') }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card card-stats bg-white shadow-sm p-3 mb-4 border-0 rounded-4">
+            <div class="d-flex align-items-center">
+                <div class="flex-shrink-0 bg-warning p-3 rounded-circle text-white">
+                    <i class="bi bi-check-circle fs-3"></i>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <h6 class="text-muted mb-0">Carga de Notas</h6>
+                    {% if config.notas_habilitadas %}
+                        <h5 class="fw-bold mb-0 text-success">ACTIVADO</h5>
+                    {% else %}
+                        <h5 class="fw-bold mb-0 text-danger">DESACTIVADO</h5>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 rounded-4 mb-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold text-success">
+                    <i class="bi bi-geo-alt me-2"></i>Participantes por Estado y Categoría
+                </h5>
+            </div>
+            <div class="table-responsive p-3">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr class="text-center">
+                            <th class="text-start">Estado</th>
+                            <th><span class="badge bg-info text-dark px-3" style="height: 25px;">Categoría A (15-17)</span></th>
+                            <th><span class="badge bg-warning text-dark px-3" style="height: 25px;">Categoría B (18-22)</span></th>
+                            <th class="badge bg-dark text-white px-5">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {# Inicializamos acumuladores para el Gran Total Nacional usando namespace #}
+                        {% set total_nacional = namespace(A=0, B=0, G=0) %}
+
+                        {% for estado, data in stats.items() %}
+                        <tr class="text-center">
+                            <td class="fw-semibold text-start">{{ estado }}</td>
+                            <td>{{ "{:,.0f}".format(data.A).replace(',', '.') }}</td>
+                            <td>{{ "{:,.0f}".format(data.B).replace(',', '.') }}</td>
+                            <td class="fw-bold bg-light">
+                                {{ "{:,.0f}".format(data.total).replace(',', '.') }}
+                            </td>
+                        </tr>
+                        {# Sumatoria de cada columna #}
+                        {% set total_nacional.A = total_nacional.A + data.A %}
+                        {% set total_nacional.B = total_nacional.B + data.B %}
+                        {% set total_nacional.G = total_nacional.G + data.total %}
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr class="text-center align-middle" style="height: 75px; border-top: 2px solid #dee2e6;">
+                            <td class="text-start fw-bold text-uppercase fs-6" style="letter-spacing: 1px;">Total Nacional</td>
+                            <td>
+                                <div class="bg-info text-dark fw-bold py-2 px-4 rounded-pill shadow-sm d-inline-block" style="min-width: 90px;">
+                                    {{ "{:,.0f}".format(total_nacional.A).replace(',', '.') }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="bg-warning text-dark fw-bold py-2 px-4 rounded-pill shadow-sm d-inline-block" style="min-width: 90px;">
+                                    {{ "{:,.0f}".format(total_nacional.B).replace(',', '.') }}
+                                </div>
+                            </td>
+                            <td>
+                                <div class="bg-dark text-white fw-bold py-2 px-4 rounded-pill shadow-sm d-inline-block" style="min-width: 110px;">
+                                    {{ "{:,.0f}".format(total_nacional.G).replace(',', '.') }}
+                                </div>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 text-center py-4">
+        <img src="/static/nanotecnologia.png" style="max-width: 150px;" class="mb-3 opacity-75">
+        <p class="text-muted small">Plataforma de Gestión - Semilleros Científicos 2026</p>
+    </div>
+</div>
+
+<div class="modal fade" id="modalPromocion" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form action="{{ url_for('promocionar_fase') }}" method="POST" class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title fw-bold">Configurar Salto de Fase</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">1. Seleccionar Categoría</label>
+                    <select name="categoria" class="form-select" required>
+                        <option value="A">Categoría A (15 a 17 años)</option>
+                        <option value="B">Categoría B (18 a 22 años)</option>
+                    </select>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Desde Fase...</label>
+                        <select name="fase_actual" class="form-select">
+                            <option value="Estadal">Estadal</option>
+                            <option value="Regional">Regional</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Hacia Fase...</label>
+                        <select name="fase_siguiente" class="form-select">
+                            <option value="Regional">Regional</option>
+                            <option value="Nacional">Nacional</option>
+                        </select>
+                    </div>
+                </div>
+                <hr>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Método de Clasificación</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="metodo" value="nacional" checked id="m1">
+                        <label class="form-check-label" for="m1">Los mejores del país (Top X Global)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="metodo" value="por_estado" id="m2">
+                        <label class="form-check-label" for="m2">Los mejores por estado (Top X por Estado)</label>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Cantidad de jóvenes a clasificar (X)</label>
+                    <input type="number" name="cantidad" class="form-control" placeholder="Ej: 500" required>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-warning fw-bold">Ejecutar Promoción Masiva</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

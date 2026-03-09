@@ -1,0 +1,127 @@
+﻿{% extends "tutor/base_tutor.html" %} {% block title %}Carga de Notas{% endblock %}
+
+{% block content %}
+
+
+<style>
+
+    body {
+        background-color: #f8f9fa; /* Un gris muy claro */
+        margin: 0;
+        padding: 0;
+        width: 82%;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <div>
+        <h2 class="fw-bold text-success mb-0">Evaluación Nacional 2026</h2>
+        <p class="text-muted">Gestión de calificaciones por fase competitiva.</p>
+    </div>
+    {% if not config.notas_habilitadas %}
+    <div class="alert alert-danger mb-0 py-2 shadow-sm rounded-3">
+        <i class="bi bi-lock-fill me-2"></i>SISTEMA CERRADO
+    </div>
+    {% endif %}
+</div>
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Participante / Categoría</th>
+                        <th>Fase Actual</th>
+                        <th class="text-center">Estadal</th>
+                        <th class="text-center">Regional</th>
+                        <th class="text-center">Nacional</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for joven in jovenes %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-success-subtle text-success p-2 rounded-circle me-3">
+                                    <i class="bi bi-person-check-fill"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-bold d-block text-dark text-uppercase">{{ joven.nombres }} {{ joven.apellidos }}</span>
+                                    <small class="text-muted">{{ joven.estado }} | <b>Cat {{ joven.categoria }}</b></small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge {% if joven.fase == 'Estadal' %}bg-info{% elif joven.fase == 'Regional' %}bg-warning text-dark{% else %}bg-danger{% endif %} rounded-pill px-3">
+                                {{ joven.fase }}
+                            </span>
+                        </td>
+                        <td class="text-center {% if joven.fase == 'Estadal' %}bg-primary-subtle fw-bold{% endif %}">
+                            {{ "{:,.2f}".format(joven.nota_estadal or 0).replace(',', 'X').replace('.', ',').replace('X', '.') }}
+                        </td>
+                        <td class="text-center {% if joven.fase == 'Regional' %}bg-primary-subtle fw-bold{% endif %}">
+                            {{ "{:,.2f}".format(joven.nota_regional or 0).replace(',', 'X').replace('.', ',').replace('X', '.') }}
+                        </td>
+                        <td class="text-center {% if joven.fase == 'Nacional' %}bg-primary-subtle fw-bold{% endif %}">
+                            {{ "{:,.2f}".format(joven.nota_nacional or 0).replace(',', 'X').replace('.', ',').replace('X', '.') }}
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-success btn-sm px-3 shadow-sm"
+                                    onclick="abrirModalNota({{ joven.id }}, '{{ joven.fase }}', '{{ joven.nombres }} {{ joven.apellidos }}')"
+                                    {% if not config.notas_habilitadas %}disabled{% endif %}>
+                                <i class="bi bi-pencil-square me-1"></i> Calificar
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="bi bi-clipboard-x fs-1 opacity-25"></i>
+                            <h5 class="mt-2">No hay estudiantes para evaluar</h5>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalNota" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <form id="formNota" method="POST" class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-success text-white border-0 py-3">
+                <h5 class="modal-title fw-bold"><i class="bi bi-graph-up me-2"></i>Registrar Calificación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <h4 id="nombreJoven" class="fw-bold text-dark mb-1"></h4>
+                <div class="badge bg-secondary mb-4 px-3 py-2" id="faseBadge"></div>
+
+                <div class="mb-3 mx-auto" style="max-width: 200px;">
+                    <label class="form-label fw-bold">Puntuación Final</label>
+                    <input type="text" name="nota" class="form-control form-control-lg text-center fw-bold border-success text-success"
+                           placeholder="00,00" autofocus required>
+                    <small class="text-muted">Use la coma para decimales</small>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-3">
+                <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-success px-5 fw-bold shadow">Guardar Nota</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function abrirModalNota(id, fase, nombre) {
+        const modal = new bootstrap.Modal(document.getElementById('modalNota'));
+        document.getElementById('formNota').action = "/evaluador/guardar_nota/" + id;
+        document.getElementById('nombreJoven').innerText = nombre;
+        document.getElementById('faseBadge').innerText = "CALIFICANDO FASE: " + fase;
+        modal.show();
+    }
+</script>
+{% endblock %}

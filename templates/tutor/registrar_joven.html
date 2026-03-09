@@ -1,0 +1,378 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Inscribir Participante{% endblock %}
+
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+<div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+
+
+<style>
+    body {
+        width: 83%;
+        margin: 0px;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f0fdf4;
+    }
+
+    .badge-estado {
+        background-color: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+        font-weight: 600;
+    }
+</style>
+
+
+<div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <div>
+        <h2 class="fw-bold text-success mb-0">Inscripción de Participante</h2>
+        <p class="text-muted">Gestión de datos y contacto - Olimpiada 2026</p>
+    </div>
+    <a href="{{ url_for('tutor_dashboard') }}" class="btn btn-outline-secondary shadow-sm">
+        <i class="bi bi-arrow-left me-2"></i>Volver
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <form method="POST" class="card shadow-sm border-0 rounded-4 mb-5">
+            <div class="card-body p-4 p-md-5">
+
+                <div class="mb-5">
+                    <h5 class="text-success border-bottom pb-2 mb-4">
+                        <i class="bi bi-person-vcard me-2"></i>Identificación del Joven
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small">Primer Nombre *</label>
+                            <input type="text" name="nombres" class="form-control rounded-3 text-capitalize" onkeypress="return /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+$/.test(event.key)" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small text-muted">Segundo Nombre</label>
+                            <input type="text" name="segundo_nombre" class="form-control rounded-3 text-capitalize" onkeypress="return /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+$/.test(event.key)">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small">Primer Apellido *</label>
+                            <input type="text" name="apellidos" class="form-control rounded-3 text-capitalize" onkeypress="return /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+$/.test(event.key)" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small text-muted">Segundo Apellido</label>
+                            <input type="text" name="segundo_apellido" class="form-control rounded-3 text-capitalize" onkeypress="return /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+$/.test(event.key)">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small">Cédula *</label>
+                            <input type="text" name="cedula" class="form-control rounded-3" onkeypress="return /^[0-9]+$/.test(event.key)" required>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small">Sexo *</label>
+
+                            <select name="sexo" id="sexo" class="form-select rounded-3" required>
+
+                                <option value="" disabled selected>Seleccione...</option>
+
+                                <option value="Masculino">Masculino</option>
+
+                                <option value="Femenino">Femenino</option>
+
+                            </select>
+
+                        </div>
+
+
+
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small">Edad *</label>
+                            <select name="edad" id="selectEdad" class="form-select rounded-3" onchange="manejarEdad()" required>
+                                <option value="" selected disabled>Seleccione...</option>
+                                {% for i in range(15, 23) %}
+                                <option value="{{ i }}">{{ i }} años</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small text-muted">Categoría</label>
+                            <div id="badgeCategoria" class="form-control border-0 bg-light fw-bold text-center rounded-3">---</div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="row g-3">
+
+                    <div class="col-md-3">
+
+                        <label class="form-label fw-bold small">Institución Educativa / Universidad *</label>
+
+                        <input type="text" name="escuela" class="form-control rounded-3" required>
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <label class="form-label fw-bold small">Grado / Año / Semestre *</label>
+
+                        <select name="grado" class="form-select rounded-3" required>
+
+                            <option value="" selected disabled>Seleccione nivel...</option>
+
+                            <optgroup label="Media General / Técnica">
+
+                                <option value="3er Año">3er Año</option>
+
+                                <option value="4to Año">4to Año</option>
+
+                                <option value="5to Año">5to Año</option>
+
+                                <option value="6to Año (Técnica)">6to Año (Técnica)</option>
+
+                            </optgroup>
+
+                            <optgroup label="Educación Superior">
+
+                                <option value="1er - 2do Semestre">1er - 2do Semestre</option>
+
+                                <option value="3er - 4to Semestre">3er - 4to Semestre</option>
+
+                                <option value="5to Semestre o más">5to Semestre o más</option>
+
+                            </optgroup>
+
+                        </select>
+
+                    </div>
+
+
+
+                    <div class="col-md-3">
+
+                        <label class="form-label fw-bold small text-muted">Teléfono (Opcional)</label>
+
+                        <input type="tel" name="telefono" class="form-control rounded-3" placeholder="Ej: 04121234567" onkeypress="return /^[0-9]+$/.test(event.key)">
+
+                    </div>
+
+                    <div class="col-md-3">
+
+                        <label class="form-label fw-bold small text-muted">Correo (Opcional)</label>
+
+                        <input type="email" name="email" class="form-control rounded-3" placeholder="ejemplo@correo.com">
+
+                    </div>
+
+
+
+
+
+                    <div class="mb-5">
+                        <h5 class="text-success border-bottom pb-2 mb-4">
+                            <i class="bi bi-geo-alt me-2"></i>Dirección de Residencia del Joven *
+                        </h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">Estado *</label>
+                                <select id="selectEstado" name="estado" class="form-select" onchange="cargarMunicipios()" required>
+                                    <option value="" selected disabled>Seleccione...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">Municipio *</label>
+                                <select id="selectMunicipio" name="municipio" class="form-select" onchange="cargarParroquias()" required disabled>
+                                    <option value="" selected disabled>---</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">Parroquia *</label>
+                                <select id="selectParroquia" name="parroquia" class="form-select" required disabled>
+                                    <option value="" selected disabled>---</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+                    <div id="seccionRepresentante" class="mb-5 p-4 bg-light rounded-4 border" style="display: none;">
+                        <h5 class="text-primary border-bottom border-primary pb-2 mb-4">
+                            <i class="bi bi-person-badge me-2"></i>Datos del Representante
+                            <span id="txtObligatorio" class="badge bg-danger ms-2" style="display:none;">Obligatorio</span>
+                        </h5>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">Primer Nombre *</label>
+                                <input type="text" name="rep_nombre1" class="form-control rep-field text-capitalize">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">Segundo Nombre</label>
+                                <input type="text" name="rep_nombre2" class="form-control text-capitalize">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">Primer Apellido *</label>
+                                <input type="text" name="rep_apellido1" class="form-control rep-field text-capitalize">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">Segundo Apellido</label>
+                                <input type="text" name="rep_apellido2" class="form-control text-capitalize">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">Cédula *</label>
+                                <input type="text" name="rep_cedula" class="form-control rep-field" onkeypress="return /^[0-9]+$/.test(event.key)">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">Parentesco *</label>
+                                <select name="rep_parentesco" class="form-select rep-field">
+                                    <option value="" selected disabled>Seleccione...</option>
+                                    <option value="Mamá">Mamá</option>
+                                    <option value="Papá">Papá</option>
+                                    <option value="Tía">Tía</option>
+                                    <option value="Tío">Tío</option>
+                                    <option value="Abuelo/a">Abuelo/a</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">Profesión / Oficio *</label>
+                                <input type="text" name="rep_profesion" class="form-control rep-field">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-bold small">Teléfono *</label>
+                                <input type="tel" name="rep_telefono" class="form-control rep-field" placeholder="04121234567">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">Estado (Rep.) *</label>
+                                <select id="rep_estado" name="rep_estado" class="form-select rep-field" onchange="cargarMunicipiosRep()">
+                                    <option value="" selected disabled>Seleccione...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">Municipio (Rep.) *</label>
+                                <select id="rep_municipio" name="rep_municipio" class="form-select rep-field" onchange="cargarParroquiasRep()" disabled>
+                                    <option value="" selected disabled>---</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">Parroquia (Rep.) *</label>
+                                <select id="rep_parroquia" name="rep_parroquia" class="form-select rep-field" disabled>
+                                    <option value="" selected disabled>---</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <div class="d-grid gap-2 mt-5">
+                        <button type="submit" class="btn btn-success btn-lg fw-bold shadow-sm rounded-3">
+                            <i class="bi bi-check-all me-2"></i>Finalizar Registro
+                        </button>
+                    </div>
+
+                </div>
+        </form>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/venezuela.js') }}"></script>
+
+<script>
+    // Referencias
+    const selectEdad = document.getElementById('selectEdad');
+    const seccionRep = document.getElementById('seccionRepresentante');
+    const txtObligatorio = document.getElementById('txtObligatorio');
+    const repFields = document.querySelectorAll('.rep-field');
+
+    // Lógica de Edad y Categoría
+    function manejarEdad() {
+        const edad = parseInt(selectEdad.value);
+        actualizarCategoria(edad);
+
+        // Mostrar sección representante
+        seccionRep.style.display = 'block';
+
+        if (edad <= 17) {
+            // OBLIGATORIO
+            txtObligatorio.style.display = 'inline-block';
+            repFields.forEach(f => f.required = true);
+        } else {
+            // OPCIONAL
+            txtObligatorio.style.display = 'none';
+            repFields.forEach(f => f.required = false);
+        }
+    }
+
+    function actualizarCategoria(edad) {
+        const badge = document.getElementById('badgeCategoria');
+        if (edad >= 15 && edad <= 17) {
+            badge.innerText = "CATEGORÍA A";
+            badge.className = "form-control border-0 bg-primary-subtle text-primary fw-bold text-center rounded-3";
+        } else if (edad >= 18 && edad <= 22) {
+            badge.innerText = "CATEGORÍA B";
+            badge.className = "form-control border-0 bg-warning-subtle text-warning-emphasis fw-bold text-center rounded-3";
+        }
+    }
+
+    // --- LÓGICA DE DIRECCIONES (JOVEN Y REPRESENTANTE) ---
+
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof VENEZUELA_DATA !== 'undefined') {
+            const estados = Object.keys(VENEZUELA_DATA).sort();
+            estados.forEach(edo => {
+                document.getElementById('selectEstado').add(new Option(edo, edo));
+                document.getElementById('rep_estado').add(new Option(edo, edo));
+            });
+        }
+    });
+
+    // Funciones para el Joven
+    function cargarMunicipios() {
+        const edo = document.getElementById('selectEstado').value;
+        const m = document.getElementById('selectMunicipio');
+        m.innerHTML = '<option value="" selected disabled>Seleccione...</option>';
+        m.disabled = false;
+        Object.keys(VENEZUELA_DATA[edo]).sort().forEach(mun => m.add(new Option(mun, mun)));
+    }
+
+    function cargarParroquias() {
+        const edo = document.getElementById('selectEstado').value;
+        const mun = document.getElementById('selectMunicipio').value;
+        const p = document.getElementById('selectParroquia');
+        p.innerHTML = '<option value="" selected disabled>Seleccione...</option>';
+        p.disabled = false;
+        VENEZUELA_DATA[edo][mun].sort().forEach(par => p.add(new Option(par, par)));
+    }
+
+    // Funciones para el Representante (Nombres de ID diferentes)
+    function cargarMunicipiosRep() {
+        const edo = document.getElementById('rep_estado').value;
+        const m = document.getElementById('rep_municipio');
+        m.innerHTML = '<option value="" selected disabled>Seleccione...</option>';
+        m.disabled = false;
+        Object.keys(VENEZUELA_DATA[edo]).sort().forEach(mun => m.add(new Option(mun, mun)));
+    }
+
+    function cargarParroquiasRep() {
+        const edo = document.getElementById('rep_estado').value;
+        const mun = document.getElementById('rep_municipio').value;
+        const p = document.getElementById('rep_parroquia');
+        p.innerHTML = '<option value="" selected disabled>Seleccione...</option>';
+        p.disabled = false;
+        VENEZUELA_DATA[edo][mun].sort().forEach(par => p.add(new Option(par, par)));
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,205 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso - Olimpiadas Venezolanas de Nanotecnología</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --nano-green-vibrant: #2E7D32;
+            --nano-green-light: #4CAF50;
+            --nano-dark: #1b3d2f;
+            --nano-accent-yellow: #FFC107;
+        }
+
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #ffffff;
+            overflow: hidden;
+        }
+
+        .split-container {
+            display: flex;
+            height: 100vh;
+            align-items: stretch;
+            position: relative;
+        }
+
+        .cintillo-container {
+            position: absolute;
+            top: 5%;
+            left: 23%;
+            transform: translateX(-50%);
+            z-index: 10;
+            width: 100%;
+            text-align: center;
+        }
+
+        .cintillo-img {
+            max-width: 500px;
+            height: auto;
+        }
+
+        .login-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            background-color: #f8f9fa;
+            position: relative;
+            padding-top: 100px;
+            top: 5%;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .logo-section {
+            flex: 1.2;
+            background: linear-gradient(135deg, var(--nano-green-light) 0%, var(--nano-green-vibrant) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .logo-section::before {
+                content: "";
+                position: absolute;
+                width: 400%;
+                height: 400%;
+                background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+                opacity: 0.2;
+            }
+
+        .main-logo {
+            max-width: 50%;
+            height: auto;
+            z-index: 2;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+            transition: transform 0.3s;
+        }
+
+            .main-logo:hover {
+                transform: scale(1.01);
+            }
+
+        .logo-semilleros {
+            max-width: 250px;
+            height: auto;
+            margin-top: 20px;
+            z-index: 2;
+        }
+
+        .logo-mision {
+            max-width: 260px;
+            height: auto;
+            margin: 0 auto;
+            display: block;
+            margin-top: 15%;
+        }
+
+        .btn-nano {
+            background-color: var(--nano-green-vibrant);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+            .btn-nano:hover {
+                background-color: var(--nano-dark);
+                color: var(--nano-accent-yellow);
+            }
+
+        .form-control {
+            border-radius: 8px;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+        }
+
+        @media (max-width: 768px) {
+            .split-container {
+                flex-direction: column-reverse;
+            }
+
+            .cintillo-container {
+                position: relative;
+                top: 10px;
+                transform: none;
+                left: 0;
+            }
+
+            .cintillo-img {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="split-container">
+        <div class="cintillo-container">
+            <img src="/static/cintillo.png" alt="Ministerio de Ciencia y Tecnología" class="cintillo-img">
+        </div>
+
+        <div class="login-section">
+            <div class="login-box">
+                <div class="mb-4 text-center">
+                    <h2 class="fw-bold text-success">SISTEMA DE REGISTRO</h2>
+                    <p class="text-muted small">OLIMPIADAS VENEZOLANAS DE NANOTECNOLOGÍA 2026</p>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                {% if category == 'danger' %}
+                <div class="alert alert-danger alert-dismissible fade show small" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                <form action="/login" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-uppercase">Usuario</label>
+                        <input type="text" name="username" class="form-control" placeholder="admin" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-uppercase">Contraseña</label>
+                        <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-nano w-100 mb-4">INGRESAR</button>
+                </form>
+
+                <div class="text-center mt-4">
+                    <img src="/static/mision_ciencia.png" alt="Gran Misión Humberto Fernández Morán" class="logo-mision">
+                </div>
+            </div>
+        </div>
+
+        <div class="logo-section">
+            <img src="/static/nanotecnologia.png" alt="Olimpiada Nacional de Nanotecnología" class="main-logo">
+            <br />
+            <h2 class="fw-bold">¡ÚNETE A LA AVENTURA CIENTÍFICA!</h2>
+            <img src="/static/semillerosb.png" alt="Programa Nacional Semilleros Científicos" class="logo-semilleros">
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

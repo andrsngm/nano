@@ -1,0 +1,15 @@
+# Archivos temporales de Visual Studio
+.vs/
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+*.vsidx
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Base de datos (Solo si quieres que el repositorio esté vacío de datos reales)
+# olimpiadas_nanotecnologia.db

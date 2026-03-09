@@ -1,0 +1,202 @@
+﻿{% extends "admin/base_admin.html" %}
+
+{% block title %}Lista de Tutores{% endblock %}
+
+{% block content %}
+
+<style>
+    body {
+        width: 83%;
+        margin: 0px;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f0fdf4;
+    }
+
+    .badge-estado {
+        background-color: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+        font-weight: 600;
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <div>
+        <h1 class="h2 text-success fw-bold">Gestión de Tutores</h1>
+        <p class="text-muted small">Visualización y control de los registradores por estado.</p>
+    </div>
+    <a href="/admin/crear_tutor" class="btn btn-success shadow-sm rounded-pill px-4">
+        <i class="bi bi-person-plus-fill me-2"></i>Nuevo Tutor
+    </a>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3">Nombre Completo</th>
+                        <th>Cédula</th>
+                        <th>Usuario de Acceso</th>
+                        <th>Estado / Región</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tutor in tutores %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-success-subtle text-success p-2 rounded-circle me-3">
+                                    <i class="bi bi-person-badge-fill"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-bold d-block text-dark">{{ tutor.nombre }} {{ tutor.apellido }}</span>
+                                    <small class="text-muted text-uppercase" style="font-size: 0.7rem;">
+                                        {{ tutor.usuario.rol.replace(',', ' / ') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-light text-dark border">{{ tutor.cedula }}</span></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-at text-muted me-1"></i>
+                                <code class="text-primary fw-bold">{{ tutor.usuario.username }}</code>
+                            </div>
+                        </td>
+                        <td>
+                            {% if tutor.estado %}
+                            <span class="badge rounded-pill badge-estado px-3 py-2">
+                                <i class="bi bi-geo-alt-fill me-1"></i> {{ tutor.estado }}
+                            </span>
+                            {% else %}
+                            <span class="text-muted small italic">No asignado</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modalEditar{{ tutor.id }}">
+                                    <i class="bi bi-pencil me-1"></i> Editar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <div class="modal fade" id="modalEditar{{ tutor.id }}" tabindex="-1" aria-labelledby="modalEditarLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content border-0 shadow rounded-4">
+                                <div class="modal-header bg-success text-white rounded-top-4">
+                                    <h5 class="modal-title fw-bold" id="modalEditarLabel">
+                                        <i class="bi bi-person-gear me-2"></i>Editar Datos del Tutor
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <form action="{{ url_for('editar_tutor_admin', tutor_id=tutor.id) }}" method="POST">
+                                    <div class="modal-body p-4">
+                                        <div class="row g-3">
+                                            <div class="col-12"><h6 class="text-success fw-bold border-bottom pb-2">Información Personal</h6></div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold">Nombre</label>
+                                                <input type="text" name="nombre" class="form-control" value="{{ tutor.nombre }}" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold">Apellido</label>
+                                                <input type="text" name="apellido" class="form-control" value="{{ tutor.apellido }}" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold">Cédula</label>
+                                                <input type="text" name="cedula" class="form-control" value="{{ tutor.cedula }}" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold">Teléfono</label>
+                                                <input type="text" name="telefono" class="form-control" value="{{ tutor.telefono }}">
+                                            </div>
+
+                                            <div class="col-12 mt-4"><h6 class="text-success fw-bold border-bottom pb-2">Credenciales de Acceso</h6></div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold text-primary">Nombre de Usuario</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light"><i class="bi bi-person-circle"></i></span>
+                                                    <input type="text" name="username" class="form-control" value="{{ tutor.usuario.username }}" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small fw-bold text-primary">Nueva Contraseña</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light"><i class="bi bi-shield-lock"></i></span>
+                                                    <input type="password" name="password" class="form-control" placeholder="Dejar en blanco para no cambiar">
+                                                </div>
+                                                <small class="text-muted" style="font-size: 0.75rem;">Mínimo 6 caracteres si se desea actualizar.</small>
+                                            </div>
+
+                                            <div class="col-12 mt-4"><h6 class="text-success fw-bold border-bottom pb-2">Asignación y Roles</h6></div>
+                                            <div class="col-md-12">
+                                                <label class="form-label small fw-bold">Estado Asignado</label>
+                                                <select name="estado" class="form-select" required>
+                                                    <option value="Amazonas" {% if tutor.estado=='Amazonas' %}selected{% endif %}>Amazonas</option>
+                                                    <option value="Anzoátegui" {% if tutor.estado=='Anzoátegui' %}selected{% endif %}>Anzoátegui</option>
+                                                    <option value="Apure" {% if tutor.estado=='Apure' %}selected{% endif %}>Apure</option>
+                                                    <option value="Aragua" {% if tutor.estado=='Aragua' %}selected{% endif %}>Aragua</option>
+                                                    <option value="Barinas" {% if tutor.estado=='Barinas' %}selected{% endif %}>Barinas</option>
+                                                    <option value="Bolívar" {% if tutor.estado=='Bolívar' %}selected{% endif %}>Bolívar</option>
+                                                    <option value="Carabobo" {% if tutor.estado=='Carabobo' %}selected{% endif %}>Carabobo</option>
+                                                    <option value="Cojedes" {% if tutor.estado=='Cojedes' %}selected{% endif %}>Cojedes</option>
+                                                    <option value="Delta Amacuro" {% if tutor.estado=='Delta Amacuro' %}selected{% endif %}>Delta Amacuro</option>
+                                                    <option value="Caracas" {% if tutor.estado=='Caracas' %}selected{% endif %}>Caracas</option>
+                                                    <option value="Falcón" {% if tutor.estado=='Falcón' %}selected{% endif %}>Falcón</option>
+                                                    <option value="Guárico" {% if tutor.estado=='Guárico' %}selected{% endif %}>Guárico</option>
+                                                    <option value="Lara" {% if tutor.estado=='Lara' %}selected{% endif %}>Lara</option>
+                                                    <option value="Mérida" {% if tutor.estado=='Mérida' %}selected{% endif %}>Mérida</option>
+                                                    <option value="Miranda" {% if tutor.estado=='Miranda' %}selected{% endif %}>Miranda</option>
+                                                    <option value="Monagas" {% if tutor.estado=='Monagas' %}selected{% endif %}>Monagas</option>
+                                                    <option value="Nueva Esparta" {% if tutor.estado=='Nueva Esparta' %}selected{% endif %}>Nueva Esparta</option>
+                                                    <option value="Portuguesa" {% if tutor.estado=='Portuguesa' %}selected{% endif %}>Portuguesa</option>
+                                                    <option value="Sucre" {% if tutor.estado=='Sucre' %}selected{% endif %}>Sucre</option>
+                                                    <option value="Táchira" {% if tutor.estado=='Táchira' %}selected{% endif %}>Táchira</option>
+                                                    <option value="Trujillo" {% if tutor.estado=='Trujillo' %}selected{% endif %}>Trujillo</option>
+                                                    <option value="La Guaira" {% if tutor.estado=='La Guaira' %}selected{% endif %}>La Guaira</option>
+                                                    <option value="Yaracuy" {% if tutor.estado=='Yaracuy' %}selected{% endif %}>Yaracuy</option>
+                                                    <option value="Zulia" {% if tutor.estado=='Zulia' %}selected{% endif %}>Zulia</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-12 mt-3">
+                                                <label class="form-label small fw-bold d-block">Roles</label>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="checkbox" name="rol_tutor" {% if 'tutor' in tutor.usuario.rol %}checked{% endif %}>
+                                                    <label class="form-check-label">Tutor (Registrador)</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="checkbox" name="rol_evaluador" {% if 'evaluador' in tutor.usuario.rol %}checked{% endif %}>
+                                                    <label class="form-check-label">Evaluador</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer bg-light rounded-bottom-4">
+                                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm">Guardar Cambios</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="bi bi-info-circle fs-2 d-block mb-2"></i>
+                            No hay tutores registrados todavía en la base de datos de la Olimpiada.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

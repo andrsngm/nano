@@ -1,0 +1,143 @@
+﻿{% extends "admin/base_admin.html" %}
+
+{% block title %}Crear Tutor{% endblock %}
+
+{% block content %}
+
+
+<div class="pt-3 pb-2 mb-3 border-bottom">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/admin/lista_tutores" class="text-success text-decoration-none">Tutores</a></li>
+            <li class="breadcrumb-item active">Nuevo Registro</li>
+        </ol>
+    </nav>
+    <h1 class="h2 text-success fw-bold">Registrar Nuevo Tutor</h1>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+<div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+    {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<style>
+    /* Aplicamos el ancho exacto al cuerpo del contenido como lo tenías */
+    body {
+        width: 83%;
+        margin: 0px;
+    }
+</style>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-5">
+            <div class="bg-success p-3">
+                <h5 class="text-white mb-0"><i class="bi bi-card-checklist me-2"></i>Formulario de Inscripción</h5>
+            </div>
+            <div class="card-body p-4">
+                <form action="/admin/crear_tutor" method="POST">
+
+                    <h6 class="text-uppercase text-muted small fw-bold mb-4 border-bottom pb-2">Datos Personales</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Nombres</label>
+                            <input type="text" name="nombre" class="form-control" placeholder="Ej: Juan" onkeypress="return /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+$/.test(event.key)" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Apellidos</label>
+                            <input type="text" name="apellido" class="form-control" placeholder="Ej: Pérez"  onkeypress="return /^[a-zA-ZñÑáéíóúÁÉÍÓÚ]+$/.test(event.key)" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Número de Cédula</label>
+                            <input type="text" name="cedula" class="form-control" placeholder="V-12345678" onkeypress="return /^[0-9]+$/.test(event.key)" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Estado al que pertenece</label>
+                            <select name="estado" class="form-select" required>
+                                <option value="" selected disabled>Seleccione un estado</option>
+                                <option value="Amazonas">Amazonas</option>
+                                <option value="Anzoátegui">Anzoátegui</option>
+                                <option value="Apure">Apure</option>
+                                <option value="Aragua">Aragua</option>
+                                <option value="Barinas">Barinas</option>
+                                <option value="Bolívar">Bolívar</option>
+                                <option value="Carabobo">Barabobo</option>
+                                <option value="Caracas">Caracas</option>
+                                <option value="Cojedes">Cojedes</option>
+                                <option value="Delta Amacuro">Delta Amacuro</option>
+                                <option value="Falcón">Falcón</option>
+                                <option value="Guárico">Guárico</option>
+                                <option value="La Guaira">La Guaira</option>
+                                <option value="Lara">Lara</option>
+                                <option value="Mérida">Mérida</option>
+                                <option value="Miranda">Miranda</option>
+                                <option value="Monagas">Monagas</option>
+                                <option value="Nueva Esparta">Nueva Esparta</option>
+                                <option value="Portuguesa">Portuguesa</option>
+                                <option value="Sucre">Sucre</option>
+                                <option value="Táchira">Táchira</option>
+                                <option value="Trujillo">Trujillo</option>
+                                <option value="Yaracuy">Yaracuy</option>
+                                <option value="Zulia">Zulia</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h6 class="text-uppercase text-muted small fw-bold mb-4 border-bottom pb-2">Credenciales de Acceso</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Nombre de Usuario</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-at"></i></span>
+                                <input type="text" name="username" class="form-control" placeholder="juan.perez" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Contraseña Temporal</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-key"></i></span>
+                                <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                            </div>
+                            <small class="text-muted">El tutor podrá cambiarla después.</small>
+                        </div>
+                    </div>
+
+                    <h6 class="text-uppercase text-muted small fw-bold mb-3 border-bottom pb-2">Asignación de Roles</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch card p-3 border-light shadow-sm">
+                                <div class="ms-4">
+                                    <input class="form-check-input" type="checkbox" name="rol_tutor" id="tutorSwitch" checked>
+                                    <label class="form-check-label fw-bold" for="tutorSwitch">Registrador</label>
+                                    <small class="d-block text-muted">Permite inscribir jóvenes a la olimpiada.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch card p-3 border-light shadow-sm">
+                                <div class="ms-4">
+                                    <input class="form-check-input" type="checkbox" name="rol_evaluador" id="evalSwitch">
+                                    <label class="form-check-label fw-bold" for="evalSwitch">Evaluador</label>
+                                    <small class="d-block text-muted">Permite cargar notas de las pruebas.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 d-flex gap-2">
+                        <button type="submit" class="btn btn-success px-5 py-2 fw-bold shadow-sm">
+                            <i class="bi bi-check-circle me-2"></i>GUARDAR TUTOR
+                        </button>
+                        <a href="/admin/lista_tutores" class="btn btn-outline-secondary px-4 py-2 text-uppercase fw-bold">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

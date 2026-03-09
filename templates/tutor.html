@@ -1,0 +1,265 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Tutor - Semilleros NBAS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --nbas-blue-dark: #002855;
+            --nbas-blue-vibrant: #0056b3;
+            --nbas-silver: #f4f7fa;
+            --nbas-accent: #00a8e8;
+        }
+
+        body {
+            background-color: var(--nbas-silver);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+        }
+
+        .navbar {
+            background: linear-gradient(90deg, var(--nbas-blue-dark) 0%, var(--nbas-blue-vibrant) 100%);
+            border-bottom: 3px solid var(--nbas-accent);
+        }
+
+        .section-card {
+            background: #ffffff;
+            border: none;
+            border-top: 5px solid var(--nbas-blue-vibrant);
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 40, 85, 0.1);
+        }
+
+        .header-line {
+            color: var(--nbas-blue-dark);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 800;
+            border-bottom: 2px solid var(--nbas-silver);
+            padding-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .form-label {
+            font-weight: 700;
+            color: var(--nbas-blue-dark);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .form-control {
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background-color: var(--nbas-blue-dark);
+            border: none;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--nbas-blue-vibrant);
+        }
+
+        .badge-nota {
+            background-color: var(--nbas-blue-dark);
+            font-size: 0.9rem;
+            padding: 8px 12px;
+        }
+        
+        .col-num {
+            width: 40px;
+            font-weight: bold;
+            color: var(--nbas-blue-vibrant);
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark p-3 shadow">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1 text-uppercase">Olimpiadas NBAS | Panel del Tutor</span>
+        <div class="d-flex align-items-center">
+            <span class="text-white me-3 small">Representante: <strong>{{ current_user.username }}</strong></span>
+            <a href="/logout" class="btn btn-outline-light btn-sm px-3">SALIR</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card section-card mb-4">
+                <div class="card-body p-4">
+                    <h4 class="header-line mb-4"><i class="bi bi-person-plus-fill"></i> REGISTRO DE SEMILLERO</h4>
+                    <form action="/tutor/registrar_joven" method="POST">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Nombres</label>
+                                <input type="text" name="nombres" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Apellidos</label>
+                                <input type="text" name="apellidos" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Cédula (Si aplica)</label>
+                                <input type="text" name="cedula" class="form-control" placeholder="V-000000">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Edad</label>
+                                <input type="number" name="edad" class="form-control">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Sexo</label>
+                                <select name="sexo" class="form-select form-select-sm">
+                                    <option value="Masculino">M</option>
+                                    <option value="Femenino">F</option>
+                                </select>
+                            </div>
+
+                            <hr class="my-3 text-muted">
+                            
+                            <div class="col-md-8">
+                                <label class="form-label">Escuela / Institución</label>
+                                <input type="text" name="escuela" class="form-control" placeholder="Nombre del plantel">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Grado/Año</label>
+                                <input type="text" name="grado" class="form-control" placeholder="Ej: 5to Año">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Estado</label>
+                                <input type="text" name="estado" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Municipio</label>
+                                <input type="text" name="municipio" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Parroquia</label>
+                                <input type="text" name="parroquia" class="form-control">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">Dirección Exacta de Vivienda</label>
+                                <textarea name="direccion" class="form-control" rows="1"></textarea>
+                            </div>
+
+                            <hr class="my-3 text-muted">
+
+                            <div class="col-md-6">
+                                <label class="form-label">Teléfono Celular</label>
+                                <input type="text" name="telefono" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Talla de Camisa</label>
+                                <input type="text" name="talla" class="form-control" placeholder="Ej: S, M, 14">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">Condición de Salud / Alergias</label>
+                                <textarea name="salud" class="form-control" rows="2" placeholder="Describa si posee alguna discapacidad o condición especial"></textarea>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <button type="submit" class="btn btn-primary w-100 py-2 shadow">FINALIZAR REGISTRO</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card section-card">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="header-line m-0">PARTICIPANTES BAJO TU CARGO</h4>
+                        <span class="badge bg-primary rounded-pill">Total: {{ jovenes|length }}</span>
+                    </div>
+                    
+                    {% if not jovenes %}
+                    <div class="text-center py-5">
+                        <p class="text-muted">No hay jóvenes registrados aún.</p>
+                    </div>
+                    {% else %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr class="small">
+                                    <th class="col-num">#</th>
+                                    <th>ESTUDIANTE</th>
+                                    <th>CÉDULA</th>
+                                    <th class="text-center">PUNTAJE</th>
+                                    <th>ACCIÓN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for j in jovenes %}
+                                <tr>
+                                    <td class="col-num">{{ loop.index }}</td>
+                                    <td>
+                                        <div class="fw-bold text-uppercase" style="font-size: 0.85rem;">
+                                            {# FIX DEFINITIVO: Si j.nombres es None o vacío, busca en j.nombre #}
+                                            {% set n = j.nombres if (j.nombres and j.nombres != 'None') else j.nombre %}
+                                            {% set a = j.apellidos if (j.apellidos and j.apellidos != 'None') else j.apellido %}
+                                            
+                                            {{ n if (n and n != 'None') else 'NOMBRE NO' }} 
+                                            {{ a if (a and a != 'None') else 'REGISTRADO' }}
+                                        </div>
+                                        <div class="small text-muted">{{ j.escuela if j.escuela else 'Sin escuela' }}</div>
+                                    </td>
+                                    <td class="small">{{ j.cedula if j.cedula else 'S/C' }}</td>
+                                    <td class="text-center">
+                                        <span class="badge badge-nota">
+                                            {# Separación de miles con . y decimales con , según tus preferencias #}
+                                            {{ "%.2f"|format(j.nota_final if j.nota_final else 0)|replace('.', ',') }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if config.notas_habilitadas %}
+                                        <form action="/tutor/cargar_nota/{{ j.id }}" method="POST" class="d-flex gap-1">
+                                            <input type="text" name="n_final" class="form-control form-control-sm" style="width: 60px;" placeholder="0,00">
+                                            <button class="btn btn-success btn-sm px-2">✓</button>
+                                        </form>
+                                        {% else %}
+                                        <span class="text-muted small italic">Cerrado</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center mt-5 mb-4 text-muted small">
+    &copy; 2026 Ministerio del Poder Popular para la Ciencia y Tecnología<br>
+    <strong>Olimpiada Nacional de Nanotecnología - Semilleros Científicos</strong>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
