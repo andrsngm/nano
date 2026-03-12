@@ -1,32 +1,29 @@
-﻿{% extends "tutor/base_tutor.html" %}
+{% extends "tutor/base_tutor.html" %}
 
 {% block title %}Inicio{% endblock %}
 
 {% block content %}
 
 <style>
-    /* Estilos para mantener tu estructura manual pero asegurar responsividad */
-    .custom-container { 
+    .custom-container {
         margin: 0px;
-        top:0px;
-       
+        top: 0px;
     }
 
-
-    /* Ajuste de celdas para que el contenido largo no empuje la tabla */
     #tablaJovenes td, #tablaJovenes th {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
 
-    /* Permitir que la escuela use dos líneas pero sin scroll */
     .text-truncate-custom {
         max-width: 100%;
         white-space: normal;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
+        -webkit-box-orient: vertical;
+        vertical-align: middle;
         overflow: hidden;
         font-size: 0.85rem;
     }
@@ -36,10 +33,28 @@
     }
 
     body {
-        background-color: #f8f9fa; /* Un gris muy claro */
+        background-color: #f8f9fa;
         margin: 0;
         padding: 0;
-        width:82%;
+        width: 82%;
+    }
+
+    /* Estilos para validación mejorados con !important para asegurar el cambio de color */
+    .is-invalid-custom {
+        border: 2px solid #dc3545 !important;
+        background-color: #fff8f8 !important;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
+    }
+
+    .is-valid-custom {
+        border: 2px solid #198754 !important;
+        background-color: #f8fff9 !important;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.15) !important;
+    }
+
+    .error-msg {
+        font-size: 0.75rem;
+        display: none;
     }
 </style>
 
@@ -54,7 +69,7 @@
   {% endif %}
 {% endwith %}
 
-<div style="margin-top:0px;" class="custom-container d-flex justify-content-between align-items-center pt-3 pb-2 mb-4 border-bottom">
+<div class="custom-container d-flex justify-content-between align-items-center pt-3 pb-2 mb-4 border-bottom">
     <div>
         <h2 class="fw-bold text-success mb-0">Panel de Participantes</h2>
         <p class="text-muted">Lista oficial de jóvenes bajo su tutoría.</p>
@@ -66,17 +81,17 @@
 
 <div class="card shadow-sm border-0 rounded-4 custom-container mb-5">
     <div class="card-body p-4">
-        <div class="overflow-hidden">
+        <div class="table-responsive">
             <table id="tablaJovenes" class="table table-hover align-middle mb-0">
                 <thead class="bg-light text-secondary">
                     <tr>
                         <th class="ps-3">#</th>
-                        <th >Estudiante</th>
-                        <th >Cédula</th>
-                        <th class="text-center" >Categoría</th>
-                        <th >Grado / Año</th>
+                        <th>Estudiante</th>
+                        <th>Cédula</th>
+                        <th class="text-center">Categoría</th>
+                        <th>Grado / Año</th>
                         <th>Institución</th>
-                        <th class="text-center" >Acciones</th>
+                        <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -116,23 +131,38 @@
                         </td>
                     </tr>
 
-                    <div class="modal fade" id="editModalTutor{{ joven.id }}" tabindex="-1" aria-labelledby="editLabel{{ joven.id }}" aria-hidden="true">
+                    <div class="modal fade" id="editModalTutor{{ joven.id }}" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-xl modal-dialog-scrollable">
                             <div class="modal-content border-0 shadow-lg">
-                                <form action="{{ url_for('editar_joven_tutor', joven_id=joven.id) }}" method="POST">
+                                <form action="{{ url_for('editar_joven_tutor', joven_id=joven.id) }}" method="POST" id="formEdit{{ joven.id }}">
                                     <div class="modal-header bg-success text-white">
-                                        <h5 class="modal-title fw-bold" id="editLabel{{ joven.id }}">Editar Registro: {{ joven.nombres }}</h5>
+                                        <h5 class="modal-title fw-bold">Editar Registro: {{ joven.nombres }}</h5>
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body bg-light p-4 text-start">
                                         <div class="card border-0 shadow-sm mb-4">
-                                            <div class="card-header bg-white py-3"><h6 class="mb-0 text-success fw-bold"><i class="bi bi-person-fill me-2"></i>Información del Joven</h6></div>
+                                            <div class="card-header bg-white py-3">
+                                                <h6 class="mb-0 text-success fw-bold"><i class="bi bi-person-fill me-2"></i>Información del Joven</h6>
+                                            </div>
                                             <div class="card-body row g-3">
                                                 <div class="col-md-3"><label class="form-label small fw-bold">1er Nombre</label><input type="text" name="nombres" class="form-control" value="{{ joven.nombres }}" required></div>
                                                 <div class="col-md-3"><label class="form-label small fw-bold">2do Nombre</label><input type="text" name="segundo_nombre" class="form-control" value="{{ joven.segundo_nombre or '' }}"></div>
                                                 <div class="col-md-3"><label class="form-label small fw-bold">1er Apellido</label><input type="text" name="apellidos" class="form-control" value="{{ joven.apellidos }}" required></div>
                                                 <div class="col-md-3"><label class="form-label small fw-bold">2do Apellido</label><input type="text" name="segundo_apellido" class="form-control" value="{{ joven.segundo_apellido or '' }}"></div>
-                                                <div class="col-md-3"><label class="form-label small fw-bold">Cédula</label><input type="text" name="cedula" class="form-control" value="{{ joven.cedula }}" required></div>
+
+                                                <div class="col-md-3">
+                                                    <label class="form-label small fw-bold">Cédula</label>
+                                                    <input type="text"
+                                                           name="cedula"
+                                                           id="cedula_joven_{{ joven.id }}"
+                                                           class="form-control input-cedula-validar"
+                                                           value="{{ joven.cedula }}"
+                                                           data-original="{{ joven.cedula }}"
+                                                           data-tipo="joven"
+                                                           required>
+                                                    <div class="error-msg text-danger mt-1" id="err_joven_{{ joven.id }}">Cédula no válida</div>
+                                                </div>
+
                                                 <div class="col-md-2"><label class="form-label small fw-bold">Edad</label><input type="number" name="edad" class="form-control" value="{{ joven.edad }}" required></div>
                                                 <div class="col-md-3">
                                                     <label class="form-label small fw-bold">Sexo</label>
@@ -149,14 +179,29 @@
                                                 <div class="col-md-4"><label class="form-label small fw-bold">Grado</label><input type="text" name="grado" class="form-control" value="{{ joven.grado or '' }}"></div>
                                             </div>
                                         </div>
+
                                         <div class="card border-0 shadow-sm">
-                                            <div class="card-header bg-white py-3"><h6 class="mb-0 text-warning fw-bold"><i class="bi bi-people-fill me-2"></i>Información del Representante</h6></div>
+                                            <div class="card-header bg-white py-3">
+                                                <h6 class="mb-0 text-warning fw-bold"><i class="bi bi-people-fill me-2"></i>Información del Representante</h6>
+                                            </div>
                                             <div class="card-body row g-3">
                                                 <div class="col-md-3"><label class="form-label small fw-bold">1er Nombre Rep.</label><input type="text" name="rep_nombre1" class="form-control" value="{{ joven.rep_nombre1 or '' }}"></div>
                                                 <div class="col-md-3"><label class="form-label small fw-bold">2do Nombre Rep.</label><input type="text" name="rep_nombre2" class="form-control" value="{{ joven.rep_nombre2 or '' }}"></div>
                                                 <div class="col-md-3"><label class="form-label small fw-bold">1er Apellido Rep.</label><input type="text" name="rep_apellido1" class="form-control" value="{{ joven.rep_apellido1 or '' }}"></div>
                                                 <div class="col-md-3"><label class="form-label small fw-bold">2do Apellido Rep.</label><input type="text" name="rep_apellido2" class="form-control" value="{{ joven.rep_apellido2 or '' }}"></div>
-                                                <div class="col-md-4"><label class="form-label small fw-bold">Cédula Rep.</label><input type="text" name="rep_cedula" class="form-control" value="{{ joven.rep_cedula or '' }}"></div>
+
+                                                <div class="col-md-4">
+                                                    <label class="form-label small fw-bold">Cédula Rep.</label>
+                                                    <input type="text"
+                                                           name="rep_cedula"
+                                                           id="cedula_rep_{{ joven.id }}"
+                                                           class="form-control input-cedula-validar"
+                                                           value="{{ joven.rep_cedula }}"
+                                                           data-original="{{ joven.rep_cedula }}"
+                                                           data-tipo="representante">
+                                                    <div class="error-msg text-danger mt-1" id="err_rep_{{ joven.id }}">Cédula no válida</div>
+                                                </div>
+
                                                 <div class="col-md-4"><label class="form-label small fw-bold">Teléfono Rep.</label><input type="text" name="rep_telefono" class="form-control" value="{{ joven.rep_telefono or '' }}"></div>
                                                 <div class="col-md-4"><label class="form-label small fw-bold">Parentesco</label><input type="text" name="rep_parentesco" class="form-control" value="{{ joven.rep_parentesco or '' }}"></div>
                                             </div>
@@ -164,7 +209,7 @@
                                     </div>
                                     <div class="modal-footer bg-white">
                                         <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancelar</button>
-                                        <button type="submit" class="btn btn-success px-5 shadow-sm">Guardar Cambios</button>
+                                        <button type="submit" id="btnSubmit{{ joven.id }}" class="btn btn-success px-5 shadow-sm">Guardar Cambios</button>
                                     </div>
                                 </form>
                             </div>
@@ -175,9 +220,7 @@
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content border-0 shadow">
                                 <div class="modal-body p-5 text-center">
-                                    <div class="text-danger mb-4">
-                                        <i class="bi bi-exclamation-octagon" style="font-size: 4rem;"></i>
-                                    </div>
+                                    <div class="text-danger mb-4"><i class="bi bi-exclamation-octagon" style="font-size: 4rem;"></i></div>
                                     <h4 class="fw-bold">¿Confirmar eliminación?</h4>
                                     <p class="text-muted">Esta acción no se puede deshacer. Se eliminará a <b>{{ joven.nombres }}</b>.</p>
                                     <div class="d-grid gap-2 mt-4">
@@ -205,15 +248,70 @@
 
 <script>
     $(document).ready(function () {
+        // 1. Inicializar DataTable
         $('#tablaJovenes').DataTable({
-            "language": {
-                "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
-            },
+            "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
             "pageLength": 10,
             "order": [[0, "asc"]],
-            "columnDefs": [
-                { "orderable": false, "targets": 6 }
-            ]
+            "columnDefs": [{ "orderable": false, "targets": 6 }]
+        });
+
+        // 2. Función maestra de validación (CORREGIDA)
+        function validarCampoCedula($input) {
+            let valActual = $input.val().replace(/\D/g, '');
+            $input.val(valActual);
+
+            const original = String($input.attr('data-original') || "").trim();
+            const tipo = $input.data('tipo');
+            const modal = $input.closest('.modal');
+            const jovenId = modal.attr('id').replace('editModalTutor', '');
+            const $btnSubmit = $('#btnSubmit' + jovenId);
+            const $errorDiv = (tipo === 'joven') ? $('#err_joven_' + jovenId) : $('#err_rep_' + jovenId);
+
+            // CASO A: Es igual a la original (VÁLIDO)
+            if (valActual !== "" && valActual === original) {
+                $input.removeClass('is-invalid-custom').addClass('is-valid-custom');
+                $errorDiv.hide();
+                $btnSubmit.prop('disabled', false);
+                return;
+            }
+
+            // CASO B: Longitud incorrecta
+            if (valActual.length < 6 || valActual.length > 12) {
+                $input.addClass('is-invalid-custom').removeClass('is-valid-custom');
+                $errorDiv.text(valActual.length < 6 ? "Mínimo 6 dígitos" : "Máximo 12 dígitos").show();
+                $btnSubmit.prop('disabled', true);
+                return;
+            }
+
+            // CASO C: Verificación en base de datos
+            $.getJSON('/check_cedula', { cedula: valActual }, function (data) {
+                if (data.exists) {
+                    $input.addClass('is-invalid-custom').removeClass('is-valid-custom');
+                    $errorDiv.text("Esta cédula ya está registrada").show();
+                    $btnSubmit.prop('disabled', true);
+                } else {
+                    $input.removeClass('is-invalid-custom').addClass('is-valid-custom');
+                    $errorDiv.hide();
+                    $btnSubmit.prop('disabled', false);
+                }
+            }).fail(function () {
+                // Si el servidor falla, no bloqueamos al usuario
+                $input.removeClass('is-invalid-custom').addClass('is-valid-custom');
+                $btnSubmit.prop('disabled', false);
+            });
+        }
+
+        // 3. EVENTO: Al abrir el modal, validar lo que ya existe
+        $('.modal').on('shown.bs.modal', function () {
+            $(this).find('.input-cedula-validar').each(function () {
+                validarCampoCedula($(this));
+            });
+        });
+
+        // 4. EVENTO: Al escribir
+        $('.input-cedula-validar').on('input', function () {
+            validarCampoCedula($(this));
         });
     });
 </script>
