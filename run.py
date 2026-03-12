@@ -1,4 +1,5 @@
-﻿from flask import Flask, render_template, request, redirect, url_for, flash
+﻿import re
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from sqlalchemy import func, select
 from config import Config
@@ -27,6 +28,20 @@ def create_app():
             conf = Configuracion(notas_habilitadas=False)
             db.session.add(conf)
         db.session.commit()
+
+    # --- API DE VALIDACIÓN INSTANTÁNEA ---
+    @app.route('/api/validar_cedula/<cedula>')
+    @login_required
+    def validar_cedula(cedula):
+        # Limpieza de puntos/espacios para la consulta
+        c_clean = cedula.replace('.', '').replace('-', '').replace(' ', '')
+        existe = db.session.execute(select(Joven).filter_by(cedula=c_clean)).scalar_one_or_none()
+        if existe:
+            return jsonify({
+                "status": "ocupado", 
+                "mensaje": f"Ya registrada: {existe.nombres} {existe.apellidos}"
+            }), 200
+        return jsonify({"status": "disponible"}), 200
 
     # --- RUTAS DE ACCESO ---
     @app.route('/')
@@ -89,7 +104,7 @@ def create_app():
         if current_user.rol != 'admin': return redirect(url_for('login'))
         if request.method == 'POST':
             user_tutor = request.form.get('username')
-            cedula_tutor = request.form.get('cedula')
+            cedula_tutor = request.form.get('cedula', '').replace('.', '').strip()
             estado_tutor = request.form.get('estado')
             
             es_tutor = request.form.get('rol_tutor')
@@ -130,14 +145,12 @@ def create_app():
         
         tutor = db.session.get(Tutor, tutor_id)
         if tutor:
-            # Actualización de datos del Tutor
             tutor.nombre = request.form.get('nombre')
             tutor.apellido = request.form.get('apellido')
-            tutor.cedula = request.form.get('cedula')
+            tutor.cedula = request.form.get('cedula', '').replace('.', '').strip()
             tutor.telefono = request.form.get('telefono')
             tutor.estado = request.form.get('estado')
 
-            # --- ACTUALIZACIÓN DE CREDENCIALES (NUEVO) ---
             usuario = tutor.usuario
             nuevo_username = request.form.get('username')
             nueva_password = request.form.get('password')
@@ -145,11 +158,9 @@ def create_app():
             if nuevo_username:
                 usuario.username = nuevo_username
             
-            # Solo actualiza la contraseña si se escribió algo en el campo
             if nueva_password and nueva_password.strip() != "":
                 usuario.password = nueva_password
 
-            # --- ACTUALIZACIÓN DE ROLES ---
             es_tutor = request.form.get('rol_tutor')
             es_evaluador = request.form.get('rol_evaluador')
             
@@ -161,7 +172,6 @@ def create_app():
                 rol_final = 'tutor'
                 
             usuario.rol = rol_final
-            
             db.session.commit()
             flash(f"Datos y credenciales de {tutor.nombre} actualizados correctamente", "success")
         
@@ -208,6 +218,13 @@ def create_app():
         
         j = db.session.get(Joven, joven_id)
         if j:
+            cedula_joven = request.form.get('cedula', '').replace('.', '').strip()
+            cedula_rep = request.form.get('rep_cedula', '').replace('.', '').strip()
+
+            if cedula_joven == cedula_rep:
+                flash("Error: La cédula del joven no puede ser igual a la del representante.", "danger")
+                return redirect(url_for('ver_base_datos'))
+
             def to_float(val):
                 if not val: return 0.0
                 try: return float(str(val).replace('.', '').replace(',', '.'))
@@ -217,7 +234,7 @@ def create_app():
             j.segundo_nombre = request.form.get('segundo_nombre').title() if request.form.get('segundo_nombre') else None
             j.apellidos = request.form.get('apellidos').title()
             j.segundo_apellido = request.form.get('segundo_apellido').title() if request.form.get('segundo_apellido') else None
-            j.cedula = request.form.get('cedula')
+            j.cedula = cedula_joven
             j.edad = int(request.form.get('edad'))
             
             sex_in = request.form.get('sexo')
@@ -232,12 +249,8 @@ def create_app():
             j.parroquia = request.form.get('parroquia')
             
             j.rep_nombre1 = request.form.get('rep_nombre1').title() if request.form.get('rep_nombre1') else None
-            j.rep_nombre2 = request.form.get('rep_nombre2').title() if request.form.get('rep_nombre2') else None
-            j.rep_apellido1 = request.form.get('rep_apellido1').title() if request.form.get('rep_apellido1') else None
-            j.rep_apellido2 = request.form.get('rep_apellido2').title() if request.form.get('rep_apellido2') else None
-            j.rep_cedula = request.form.get('rep_cedula')
+            j.rep_cedula = cedula_rep
             j.rep_parentesco = request.form.get('rep_parentesco')
-            j.rep_profesion = request.form.get('rep_profesion').title() if request.form.get('rep_profesion') else None
             j.rep_telefono = request.form.get('rep_telefono')
             
             j.fase = request.form.get('fase')
@@ -270,13 +283,28 @@ def create_app():
         if 'tutor' not in current_user.rol: return redirect(url_for('login'))
         
         if request.method == 'POST':
-            cedula = request.form.get('cedula')
+            cedula_raw = request.form.get('cedula', '').strip()
+            cedula = cedula_raw.replace('.', '').replace('-', '').replace(' ', '')
+            
+            rep_cedula_raw = request.form.get('rep_cedula', '').strip()
+            rep_cedula = rep_cedula_raw.replace('.', '').replace('-', '').replace(' ', '')
+            
             sexo_raw = request.form.get('sexo')
             edad_str = request.form.get('edad')
 
+            # Validación de formato de cédula
+            cedula_pattern = re.compile(r'^\d{6,12}$')
+            if not cedula_pattern.match(cedula):
+                flash(f"Error: La cédula '{cedula_raw}' no es válida. Use solo números (6-12 dígitos).", "danger")
+                return redirect(url_for('registrar_joven'))
+
+            if cedula == rep_cedula:
+                flash("Error: La cédula del joven no puede ser igual a la del representante.", "danger")
+                return redirect(url_for('registrar_joven'))
+
             existe = db.session.execute(select(Joven).filter_by(cedula=cedula)).scalar_one_or_none()
             if existe:
-                flash(f"La cédula {cedula} ya está registrada a nombre de {existe.nombres} {existe.apellidos}.", "danger")
+                flash(f"La cédula {cedula} ya está registrada a nombre de {existe.nombres}.", "danger")
                 return redirect(url_for('registrar_joven'))
 
             if not sexo_raw:
@@ -284,7 +312,6 @@ def create_app():
                 return redirect(url_for('registrar_joven'))
 
             sexo_final = "Masculino" if sexo_raw in ['M', 'Masculino'] else "Femenino"
-
             tutor_perfil = db.session.execute(select(Tutor).filter_by(usuario_id=current_user.id)).scalar_one()
             edad = int(edad_str)
             
@@ -294,11 +321,6 @@ def create_app():
                 cat_asignada = 'B'
             else:
                 flash("La edad debe estar entre 15 y 22 años.", "danger")
-                return redirect(url_for('registrar_joven'))
-
-            rep_cedula = request.form.get('rep_cedula')
-            if edad <= 17 and not rep_cedula:
-                flash("Los datos del representante son obligatorios para menores de 18 años.", "danger")
                 return redirect(url_for('registrar_joven'))
 
             nuevo = Joven(
@@ -321,17 +343,10 @@ def create_app():
                 categoria=cat_asignada,
                 fase='Estadal',
                 tutor_id=tutor_perfil.id,
-                rep_nombre1=request.form.get('rep_nombre1').title() if request.form.get('rep_nombre1') else None,
-                rep_nombre2=request.form.get('rep_nombre2').title() if request.form.get('rep_nombre2') else None,
-                rep_apellido1=request.form.get('rep_apellido1').title() if request.form.get('rep_apellido1') else None,
-                rep_apellido2=request.form.get('rep_apellido2').title() if request.form.get('rep_apellido2') else None,
+                rep_nombre1=request.form.get('rep_nombre1', '').title(),
                 rep_cedula=rep_cedula,
                 rep_parentesco=request.form.get('rep_parentesco'),
-                rep_profesion=request.form.get('rep_profesion').title() if request.form.get('rep_profesion') else None,
-                rep_telefono=request.form.get('rep_telefono'),
-                rep_estado=request.form.get('rep_estado'),
-                rep_municipio=request.form.get('rep_municipio'),
-                rep_parroquia=request.form.get('rep_parroquia')
+                rep_telefono=request.form.get('rep_telefono')
             )
             
             db.session.add(nuevo)
@@ -344,44 +359,72 @@ def create_app():
     @app.route('/tutor/editar_joven/<int:joven_id>', methods=['POST'])
     @login_required
     def editar_joven_tutor(joven_id):
-        if 'tutor' not in current_user.rol: return redirect(url_for('login'))
+        if 'tutor' not in current_user.rol: 
+            return redirect(url_for('login'))
+            
         tutor_perfil = db.session.execute(select(Tutor).filter_by(usuario_id=current_user.id)).scalar_one()
         j = db.session.get(Joven, joven_id)
         
-        if j and j.tutor_id == tutor_perfil.id:
-            j.nombres = request.form.get('nombres').title()
-            j.segundo_nombre = request.form.get('segundo_nombre').title() if request.form.get('segundo_nombre') else None
-            j.apellidos = request.form.get('apellidos').title()
-            j.segundo_apellido = request.form.get('segundo_apellido').title() if request.form.get('segundo_apellido') else None
-            j.cedula = request.form.get('cedula')
-            j.edad = int(request.form.get('edad'))
+        if not j or j.tutor_id != tutor_perfil.id:
+            flash("Acceso no autorizado.", "danger")
+            return redirect(url_for('tutor_dashboard'))
+
+        # 1. Obtener y limpiar datos (Eliminar puntos, espacios o guiones)
+        cedula_raw = request.form.get('cedula', '').strip()
+        cedula = cedula_raw.replace('.', '').replace('-', '').replace(' ', '')
+        
+        rep_cedula_raw = request.form.get('rep_cedula', '').strip()
+        rep_cedula = rep_cedula_raw.replace('.', '').replace('-', '').replace(' ', '')
+        
+        # 2. Validación: Cédula (6-12 dígitos numéricos)
+        cedula_pattern = re.compile(r'^\d{6,12}$')
+        if not cedula_pattern.match(cedula):
+            flash(f"Error: La cédula '{cedula_raw}' no es válida. Use solo números (6-12 dígitos).", "danger")
+            return redirect(url_for('tutor_dashboard'))
+
+        # 3. Validación de duplicados (excluyendo al joven actual)
+        joven_existente = db.session.execute(
+            select(Joven).filter(Joven.cedula == cedula, Joven.id != joven_id)
+        ).scalar_one_or_none()
+        
+        if joven_existente:
+            flash(f"Error: La cédula {cedula} ya pertenece a otro participante.", "danger")
+            return redirect(url_for('tutor_dashboard'))
+
+        if cedula == rep_cedula:
+            flash("Error: La cédula del joven no puede ser igual a la del representante.", "danger")
+            return redirect(url_for('tutor_dashboard'))
+
+        # 4. Proceder con la actualización
+        try:
+            j.nombres = request.form.get('nombres', '').title()
+            j.apellidos = request.form.get('apellidos', '').title()
+            j.cedula = cedula
+            j.edad = int(request.form.get('edad', j.edad))
             
             sex_in = request.form.get('sexo')
-            j.sexo = "Masculino" if sex_in in ['M', 'Masculino'] else "Femenino"
+            j.sexo = "Masculino" if sex_in in ['M', 'Masculino', 'masculino'] else "Femenino"
             
             j.telefono = request.form.get('telefono')
             j.email = request.form.get('email')
             j.escuela = request.form.get('escuela')
             j.grado = request.form.get('grado')
-            j.estado = request.form.get('estado')
-            j.municipio = request.form.get('municipio')
-            j.parroquia = request.form.get('parroquia')
-            
-            j.rep_nombre1 = request.form.get('rep_nombre1').title() if request.form.get('rep_nombre1') else None
-            j.rep_nombre2 = request.form.get('rep_nombre2').title() if request.form.get('rep_nombre2') else None
-            j.rep_apellido1 = request.form.get('rep_apellido1').title() if request.form.get('rep_apellido1') else None
-            j.rep_apellido2 = request.form.get('rep_apellido2').title() if request.form.get('rep_apellido2') else None
-            j.rep_cedula = request.form.get('rep_cedula')
+            j.rep_cedula = rep_cedula
             j.rep_telefono = request.form.get('rep_telefono')
-            j.rep_parentesco = request.form.get('rep_parentesco')
             
-            if 15 <= j.edad <= 17: j.categoria = 'A'
-            elif 18 <= j.edad <= 22: j.categoria = 'B'
+            # Recalcular categoría según edad
+            if 15 <= j.edad <= 17: 
+                j.categoria = 'A'
+            elif 18 <= j.edad <= 22: 
+                j.categoria = 'B'
 
             db.session.commit()
-            flash(f"Datos de {j.nombres} actualizados correctamente.", "success")
-        else:
-            flash("Acceso no autorizado.", "danger")
+            flash(f"Registro de {j.nombres} actualizado correctamente.", "success")
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f"Error al actualizar: {str(e)}", "danger")
+            
         return redirect(url_for('tutor_dashboard'))
 
     @app.route('/tutor/eliminar_joven/<int:joven_id>', methods=['POST'])
@@ -430,4 +473,4 @@ def create_app():
 app = create_app()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+        app.run(host='0.0.0.0', port=80, debug=True)

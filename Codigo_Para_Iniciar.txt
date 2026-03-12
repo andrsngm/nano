@@ -1,0 +1,6 @@
+cd C:\Users\Mile\source\repos\Nano
+python run.py
+
+admin
+Usuario-Administrador1
+scrypt:32768:8:1$Ta5qbouZq18BXLqk$095de5c28b6a1b46e7b87fdde26f5dc443f4a78f0bcca79ea6da54e1d562e0b56d01fc72720bba7c5eba82492ecb3707f135c4102d5be2c5d64e08f713a92a19
